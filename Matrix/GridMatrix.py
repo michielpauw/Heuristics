@@ -25,3 +25,19 @@ class GridMatrix:
         list_temp.pop(a)
         list_temp.insert(a, -value)
         self.list_ver.insert(b, list_temp)
+
+    def create_route(self, route_x, route_y, value):
+        if (len(route_x) != len(route_y)):
+            return False
+        
+        length = len(route_y)
+        for i in range(length):
+            b = route_y[i]
+            a = route_x[i]
+            list_temp = self.list_ver[b]
+            self.list_ver.pop(b)
+            list_temp.pop(a)
+            list_temp.insert(a, value + 1)
+            self.list_ver.insert(b, list_temp)
+        
+            
