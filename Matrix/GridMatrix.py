@@ -8,6 +8,9 @@ class GridMatrix:
     def __init__(self, a, b):
         self.hor = a
         self.vert = b
+
+    def get_matrix(self):
+        return self.list_ver
     
     def create_empty(self):
         for i in range(self.vert):
@@ -16,9 +19,9 @@ class GridMatrix:
                 self.list_hor.append(0)
             self.list_ver.append(self.list_hor)
 
-    def create_gate(self, a, b):
+    def create_gate(self, a, b, value):
         list_temp = self.list_ver[b]
         self.list_ver.pop(b)
         list_temp.pop(a)
-        list_temp.insert(a, -1)
+        list_temp.insert(a, -value)
         self.list_ver.insert(b, list_temp)
