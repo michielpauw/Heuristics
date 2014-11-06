@@ -117,15 +117,15 @@ class Route:
                     self.steps.append(3)
                     self.steps.append(1)
                     up_added += 1
-##                elif (random_hor_rem > .5 and left_added > 0):
-##                    self.steps.remove(2)
-##                    self.steps.remove(0)
-##                    left_added -= 1
-##                
-##                elif (random_vert_rem > .5 and up_added > 0):
-##                      self.steps.remove(3)
-##                      self.steps.remove(1)
-##                      up_added -= 1
+                    
+                if (random_hor_rem > .5 and left_added > 0):
+                    self.steps.remove(2)
+                    self.steps.remove(0)
+                    left_added -= 1
+                elif (random_vert_rem > .5 and up_added > 0):
+                      self.steps.remove(3)
+                      self.steps.remove(1)
+                      up_added -= 1
 
                 random.shuffle(self.steps)
                 route = False
@@ -133,7 +133,8 @@ class Route:
                 self.route_y = []
                 self.x_0 = self.x_0_original
                 self.y_0 = self.y_0_original
-
+                print self.steps
+                
         return self.steps
 
     # the methods for actually moving around

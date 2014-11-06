@@ -30,7 +30,6 @@ def main():
     # and connect them in a quite random order (still resulting in an infinite
     # loop, working on that)
     random_order = random.sample(range(len(scheme)), len(scheme))
-    print random_order
     route_list_x = []
     route_list_y = []
     matrix_val = matrix.get_matrix()
@@ -39,7 +38,6 @@ def main():
     for i in range(len(scheme)):
         route_number = random_order[i]
         route = scheme[route_number]
-        print route
         start_number = route[0]
         finish_number = route[1]
         start_coordinates = results[int(start_number)]
