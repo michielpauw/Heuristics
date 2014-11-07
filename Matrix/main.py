@@ -1,5 +1,7 @@
 import GridMatrix
 from route import Route
+from graph_matrix import GraphMatrix
+from clique_finder import CliqueFinder
 import csv
 import sys
 import random
@@ -9,16 +11,10 @@ def main():
     matrix = GridMatrix.GridMatrix(18, 12)
     new_route = Route(18, 12)
     matrix.create_empty()
+    clique_finder = CliqueFinder(0)
 
-    # create a list of the coordinates of the logical gates
-    results = []
-    with open('grid_1.txt') as inputfile:
-        file = csv.reader(inputfile, quoting=csv.QUOTE_NONNUMERIC)
-        for row in file:
-            results.append(row)
-    # and place them in the empty matrix
-    for result in results:
-        matrix.create_gate(int(result[0]), int(result[1]), int(result[2]))
+    matrix.read_coordinates('grid_1.txt')
+    results = matrix.get_results()
 
     # create a list of all the gates that should be connected
     scheme = []
@@ -27,12 +23,18 @@ def main():
         for row in file:
             scheme.append(row)
 
+    # create a matrix representing a graph of all the routes in the scheme
+    graph_matrix = GraphMatrix(len(scheme))
+    graph_matrix_val = graph_matrix.get_matrix()
+    
+    
     # and connect them in a quite random order (still resulting in an infinite
     # loop, working on that)
     random_order = random.sample(range(len(scheme)), len(scheme))
     route_list_x = []
     route_list_y = []
     matrix_val = matrix.get_matrix()
+
     
     new_route.import_matrix(matrix_val)
     for i in range(len(scheme)):
@@ -46,13 +48,59 @@ def main():
         y_0 = start_coordinates[1]
         x_1 = finish_coordinates[0]
         y_1 = finish_coordinates[1]
-        route_append = new_route.createRoute(int(x_0), int(x_1), int(y_0), int(y_1), route)
+        route_append = new_route.createRoute(int(x_0), int(x_1),
+                                             int(y_0), int(y_1), route)
         if (route_append):
             route_list_x.append(new_route.route_x)
             route_list_y.append(new_route.route_y)
         else:
             route_list.append("schijt")
+            return False
 
+    crossing_amount_list = []
+    
+    crosses = False
+    # detect a crossing of two routes (not perfectly efficient, but it works
+    # rather nicely)
+    for i in range(len(route_list_x)):
+        crossing_amount = 0
+        route_x_check_1 = route_list_x[i]
+        route_y_check_1 = route_list_y[i]
+        for j in range(len(route_list_x)):
+            if (j != i):
+                crosses = False
+                route_x_check_2 = route_list_x[j]
+                route_y_check_2 = route_list_y[j]
+                for k in range(len(route_x_check_1)):
+                    if (crosses):
+                        break
+                    x = route_x_check_1[k]
+                    y = route_y_check_1[k]
+                    for l in range(len(route_x_check_2)):
+                        if (route_x_check_2[l] == x and route_y_check_2[l] == y):
+                            graph_matrix.insert_node(i, j)
+                            crosses = True
+                            crossing_amount += 1
+                            break
+        crossing_amount_list.append([i, crossing_amount])
+
+    graph_matrix_val = graph_matrix.get_matrix()
+
+    max_clique = 0
+
+##    max_clique = clique_finder.clique_size(graph_matrix_val, 0)
+
+    print max_clique
+    sorted_by_second = sorted(crossing_amount_list, key=lambda tup: tup[1])
+    
+    for column in graph_matrix_val:
+        for row in column:
+            sys.stdout.write("%02d " % (row))
+            sys.stdout.write(" ")
+            sys.stdout.flush()
+        print
+
+    print sorted_by_second
     # place the routes in the matrix, overwriting after a crossing
     for i in range(len(route_list_x)):
         matrix.create_route(route_list_x[i], route_list_y[i], i)

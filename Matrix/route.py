@@ -58,6 +58,7 @@ class Route:
         self.route_y = []
         self.steps = []
         attempt = 0
+        attempt_serious = 0
         left_added = 0;
         up_added = 0;
         # We first try to draw a route which goes from a to b in as few steps
@@ -71,7 +72,7 @@ class Route:
         route = False
 
         # while no route has been established: loop
-        while (not route):
+        while (not route and attempt_serious < 100):
             cont = True
             # self.steps tells the route to go right or down (at first) or left
             # or up (after no legal route can be made with just down and right)
@@ -105,6 +106,7 @@ class Route:
             # we include a step going left or up and try reaching the goal again
             if (attempt == 100):
                 attempt = 0
+                attempt_serious += 1
                 random_hor_add = random.random()
                 random_hor_rem = random.random()
                 random_vert_add = random.random()
@@ -133,7 +135,6 @@ class Route:
                 self.route_y = []
                 self.x_0 = self.x_0_original
                 self.y_0 = self.y_0_original
-                print self.steps
                 
         return self.steps
 
