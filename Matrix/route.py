@@ -23,20 +23,6 @@ class Route:
         self.matrix_x = x
         self.matrix_y = y
 
-    # if either the begin points of x or y are larger than the end points we
-    # switch them (going from a to b is the same as going from b to a in
-    # this problem.
-    def switch_coordinates(self):
-        if self.x_0 > self.x_1:
-            temp = self.x_0
-            self.x_0 = self.x_1
-            self.x_1 = temp
-
-        if self.y_0 > self.y_1:
-            temp = self.y_0
-            self.y_0 = self.y_1
-            self.y_1 = temp
-
     # import the current matrix so we can check for crossing logical gates
     # and later on also crossing routes
     def import_matrix(self, matrix_in):
@@ -48,10 +34,9 @@ class Route:
         self.y_0 = y_0
         self.x_1 = x_1
         self.y_1 = y_1
-        self.x_dist = abs(x_1 - x_0)
-        self.y_dist = abs(y_1 -y_0)
+        self.x_dist = x_1 - x_0
+        self.y_dist = y_1 - y_0
         total_dist = self.x_dist + self.y_dist
-        self.switch_coordinates()
         self.x_0_original = self.x_0
         self.y_0_original = self.y_0
         self.route_x = []
