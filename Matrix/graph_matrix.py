@@ -13,6 +13,8 @@ class GraphMatrix:
     
     # create a matrix with the right dimensions filled with only zeroes
     def create_empty(self):
+        list_1= []
+        list_2 = []
         for i in range(self.size):
             self.list_1 = []
             for j in range(self.size):
@@ -25,4 +27,12 @@ class GraphMatrix:
             self.list_2.pop(b)
             list_temp.pop(a)
             list_temp.insert(a, a)
+            self.list_2.insert(b, list_temp)
+
+    def clear_node(self, a, b):
+        if (a != b):           
+            list_temp = self.list_2[b]
+            self.list_2.pop(b)
+            list_temp.pop(a)
+            list_temp.insert(a, -1)
             self.list_2.insert(b, list_temp)
