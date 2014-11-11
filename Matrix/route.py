@@ -27,7 +27,6 @@ class Route:
         self.matrix_x = x
         self.matrix_y = y
 
-<<<<<<< HEAD
     # if either the begin points of x or y are larger than the end points we
     # switch them (going from a to b is the same as going from b to a in
     # this problem.
@@ -68,12 +67,11 @@ class Route:
             else:
                 route_list.append("schijt")
                 return False
-=======
+
     # import the current matrix so we can check for crossing logical gates
     # and later on also crossing routes
     def import_matrix(self, matrix_in):
         self.matrix = matrix_in
->>>>>>> c5974df84b0134460d21bbc841de8145b5da9c8f
 
     # a method that creates a route (for now in 2D only)
     def createRoute(self, x_0, x_1, y_0, y_1, route):
@@ -81,17 +79,14 @@ class Route:
         self.y_0 = y_0
         self.x_1 = x_1
         self.y_1 = y_1
-<<<<<<< HEAD
 
         self.x_dist = self.x_1 - self.x_0
         self.y_dist = self.y_1 - self.y_0
         total_dist = self.x_dist + self.y_dist
         
-=======
         self.x_dist = x_1 - x_0
         self.y_dist = y_1 - y_0
         total_dist = self.x_dist + self.y_dist
->>>>>>> c5974df84b0134460d21bbc841de8145b5da9c8f
         self.x_0_original = self.x_0
         self.y_0_original = self.y_0
         self.route_x = []
