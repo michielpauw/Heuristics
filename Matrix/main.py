@@ -13,6 +13,7 @@ def main():
     new_route = Route(18, 13)
 ##    clique_finder = CliqueFinder(0)
     
+    # load the chips in the matrix
     matrix.read_coordinates('grid_1.txt')
     results = matrix.get_results()
 
@@ -58,6 +59,9 @@ def main():
 ##            sys.stdout.write(" ")
 ##            sys.stdout.flush()
 ##        print
+
+    # variables for checking
+    # begrijp niet waarom we zoveel counts hebben, die we ook niet allemaal gebruiken?
     count_lines = 0
     count_lines_one = 0
     count_lines_two = 0
@@ -67,12 +71,12 @@ def main():
     route_list_y_best = []
     route_list_depth_best = []
     for i in range(1):
-        # and connect them in a quite random order (still resulting in an infinite
-        # loop, working on that)
         new_route.start_routes(scheme, matrix, results)
         route_list_x = new_route.route_list_x
         route_list_y = new_route.route_list_y
         route_list_depth = new_route.route_list_depth
+
+        # 
         layering = Layering(route_list_x, route_list_y, route_list_depth)
         
         layering.cross_matrix()
@@ -81,10 +85,14 @@ def main():
         print matrix.get_matrix()
         print len(route_list_x)
         print len(route_list_y)
+
+        # print the lines in the matrix
         for i in range(len(route_list_x)):
             matrix.create_route(route_list_x[i], route_list_y[i], route_list_depth[i], i)
         print matrix.get_matrix()
         amount_lines = layering.count_lines()
+
+        # lijkt mij twee maal hetzelfde?
         if (amount_lines < count_lines_one or i == 0):
             count_lines_one = amount_lines
         if (amount_lines < count_lines or i == 0):
