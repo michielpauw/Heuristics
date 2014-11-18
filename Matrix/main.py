@@ -19,7 +19,7 @@ def main():
     results = matrix.get_results()
 
     # create a list of all the gates that should be connected
-    new_route.read_routes('scheme_1_grid_1.txt')
+    new_route.read_routes('scheme_test.txt')
     
 ##    max_clique = 0
 
