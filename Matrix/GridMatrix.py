@@ -2,6 +2,7 @@ import csv
 
 class GridMatrix:
 
+    # define variables
     list_hor = []
     list_ver = []
     
@@ -10,23 +11,29 @@ class GridMatrix:
     results = []
     
     def __init__(self, a, b):
+        # store the horizontal and vertical values
         list_ver = []
         self.hor = a
         self.vert = b
         self.create_empty()
 
+    # return a matrix
     def get_matrix(self):
         return self.list_ver
 
+    # return the gates for the matrix
     def get_results(self):
         return self.results
 
+    # read the coordinates from a file
     def read_coordinates(self, read_file):
+
         # create a list of the coordinates of the logical gates
         with open(read_file) as inputfile:
             file = csv.reader(inputfile, quoting=csv.QUOTE_NONNUMERIC)
             for row in file:
                 self.results.append(row)
+                
         # and place them in the empty matrix
         for result in self.results:
             self.create_gate(int(result[0]), int(result[1]), int(result[2]))
