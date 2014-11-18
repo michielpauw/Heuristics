@@ -27,23 +27,6 @@ class Route:
         self.matrix_x = x
         self.matrix_y = y
 
-    # if either the begin points of x or y are larger than the end points we
-    # switch them (going from a to b is the same as going from b to a in
-    # this problem.
-    # hadden we dit niet verwijderd?!!!
-    #def switch_coordinates(self):
-     #   if self.x_0 > self.x_1:
-            #temp = self.x_0
-
-            # switch the x coordinates
-      #      self.x_0, self.x_1 = self.x_1, self.x_0
-            #self.x_1 = temp
-            #temp = self.y_0
-
-            # switch the y coordinates
-       #     self.y_0, self.y_1 = self.y_1, self.y_2
-            #self.y_1 = temp
-    
     # create all the routes from gate to gate        
     def start_routes(self, scheme, matrix, results):
 
