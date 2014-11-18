@@ -4,11 +4,13 @@ class GridMatrix:
 
     list_hor = []
     list_ver = []
+    
     hor = 0
     vert = 0
     results = []
     
     def __init__(self, a, b):
+        list_ver = []
         self.hor = a
         self.vert = b
         self.create_empty()
@@ -31,6 +33,7 @@ class GridMatrix:
 
     # create a matrix with the right dimensions filled with only zeroes
     def create_empty(self):
+        self.list_ver = []
         for i in range(self.vert):
             self.list_hor = []
             for j in range(self.hor):
@@ -45,21 +48,6 @@ class GridMatrix:
         list_temp.insert(a, -value)
         self.list_ver.insert(b, list_temp)
 
-    # create a route in the matrix, overwriting previously established routes
-    # for now
-    def create_route(self, route_x, route_y, route_depth, value):
-        if (len(route_x) != len(route_y)):
-            return False
-        
-        length = len(route_y)
-        for i in range(length):
-            if route_depth[0] == 0:
-                b = route_y[i]
-                a = route_x[i]
-                list_temp = self.list_ver[b]
-                self.list_ver.pop(b)
-                list_temp.pop(a)
-                list_temp.insert(a, value + 1)
-                self.list_ver.insert(b, list_temp)
+    
         
             

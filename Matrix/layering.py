@@ -34,8 +34,9 @@ class Layering:
         crosses = False
         # detect a crossing of two routes (not perfectly efficient, but it works
         # rather nicely)
+        crossing_amount = 0
         for i in range(len(self.route_list_x)):
-            crossing_amount = 0
+            
             route_x_check_1 = self.route_list_x[i]
             route_y_check_1 = self.route_list_y[i]
             route_depth_check_1 = self.route_list_depth[i]
@@ -55,6 +56,14 @@ class Layering:
                             if (route_x_check_2[l] == x and route_y_check_2[l] == y and
                                             route_depth_check_2[l] == depth):
                                 self.graph_matrix.insert_node(i, j)
+                                print route_x_check_1
+                                print route_y_check_1
+                                print route_x_check_2[l]
+                                print x
+                                print route_y_check_2[l]
+                                print y
+                                print route_depth_check_2[l]
+                                print depth
                                 crosses = True
                                 crossing_amount += 1
                                 break
