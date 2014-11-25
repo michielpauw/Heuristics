@@ -1,4 +1,5 @@
 from GridMatrix import GridMatrix
+from line_matrix import LineMatrix
 from route import Route
 from graph_matrix import GraphMatrix
 from layering import Layering
@@ -15,8 +16,21 @@ def main():
     
     # load the chips in the matrix
     matrix = GridMatrix(18, 13)
+    line_matrix = LineMatrix(18, 13)
+    line_matrix.read_coordinates('grid_1.txt')
     matrix.read_coordinates('grid_1.txt')
     results = matrix.get_results()
+    
+    line_matrix_val = line_matrix.get_matrix()
+    for column in line_matrix_val:
+        for row in column:
+            if isinstance(row, int):
+                sys.stdout.write("%03d " % (row))
+                sys.stdout.write(" ")
+                sys.stdout.flush()
+            else:
+                sys.stdout.write(row)
+        print
 
     # create a list of all the gates that should be connected
     new_route.read_routes('scheme_test.txt')
@@ -64,21 +78,21 @@ def main():
 ##    route_list_x_best = []
 ##    route_list_y_best = []
 ##    route_list_depth_best = []
-    for i in range(1):
-        # and connect them in a quite random order (still resulting in an infinite
-        # loop, working on that)
-        new_route.start_routes()
-        new_route.draw_matrices()
-        layering = Layering(new_route.route_list_x, new_route.route_list_y, new_route.route_list_depth)
-        
-        layering.cross_matrix()
-        graph_matrix_def = layering.get_matrix()
-        for column in graph_matrix_def:
-            for row in column:
-                sys.stdout.write("%02d " % (row))
-                sys.stdout.write(" ")
-                sys.stdout.flush()
-            print
+    # for i in range(1):
+    #     # and connect them in a quite random order (still resulting in an infinite
+    #     # loop, working on that)
+    #     new_route.start_routes()
+    #     new_route.draw_matrices()
+    #     layering = Layering(new_route.route_list_x, new_route.route_list_y, new_route.route_list_depth)
+    #
+    #     layering.cross_matrix()
+    #     graph_matrix_def = layering.get_matrix()
+    #     for column in graph_matrix_def:
+    #         for row in column:
+    #             sys.stdout.write("%02d " % (row))
+    #             sys.stdout.write(" ")
+    #             sys.stdout.flush()
+    #         print
     # variables for checking
     # begrijp niet waarom we zoveel counts hebben, die we ook niet allemaal gebruiken?
 ##    count_lines = 0
