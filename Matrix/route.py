@@ -31,6 +31,8 @@ class Route:
     list_matrices = []
     list_matrix_inst = []
     amount_steps = 0
+    route = False
+    tried_up = False
 
     # get the dimensions of the matrix
     def __init__(self, x, y):
@@ -69,8 +71,6 @@ class Route:
             # get the start and finish gate
             start_number = route[0]
             finish_number = route[1]
-            print self.results
-            print finish_number
             start_coordinates = self.results[int(start_number)]
             finish_coordinates = self.results[int(finish_number)]
             # store the routes in global variables
@@ -117,9 +117,9 @@ class Route:
         self.y_0_original = self.y_0
         
         # creae the lists and counters for the routes
-        self.route_x = [x_0]
-        self.route_y = [y_0]
-        self.route_depth = [0]
+        self.route_x = []
+        self.route_y = []
+        self.route_depth = []
         self.steps = []
         attempt = 0
         attempt_serious = 0
@@ -152,9 +152,6 @@ class Route:
             for j in range (abs(self.y_dist)):
                 self.steps.append(3)
 
-        # create the route bool for the loop
-        route = False
-
 ##        for i in range(5):
 ##            if random.random() < .05 and left_added < 4:
 ##                self.steps.append(0)
@@ -176,9 +173,9 @@ class Route:
 
         random.shuffle(self.steps)
         self.current_depth = 0
-        
+        self.route = False
         # while no route has been established: loop
-        while (not route and attempt_serious < 100):
+        while (not self.route and attempt_serious < 100):
             cont = True
             # self.steps tells the route to go right or down (at first) or left
             # or up (after no legal route can be made with just down and right)
@@ -189,27 +186,17 @@ class Route:
                     not_last = False
                 step = self.steps[i]
                 i += 1
-                if (cont and step == 0):
-                    cont = self.go_right(not_last)
-                    route = True
-                elif (cont and step == 1):
-                    cont = self.go_down(not_last)
-                    route = True
-                elif (cont and step == 2):
-                    cont = self.go_left(not_last)
-                    route = True
-                elif (cont and step == 3):
-                    cont = self.go_up(not_last)
-                    route = True
+                if cont:
+                    cont = self.move_around(step, not_last)
                 # if a route encounters a logical gate the right/down steps are
                 # shuffled in an attempt to reach the correct logical gate in as
                 # few steps as possible
                 else:
                     attempt += 1
                     random.shuffle(self.steps)
-                    route = False
-                    self.route_x = [self.x_0_original]
-                    self.route_y = [self.y_0_original]
+                    self.route = False
+                    self.route_x = []
+                    self.route_y = []
                     self.x_0 = self.x_0_original
                     self.y_0 = self.y_0_original
                     break
@@ -246,12 +233,11 @@ class Route:
                       up_added -= 1
 
                 random.shuffle(self.steps)
-                route = False
-                self.route_x = [self.x_0_original]
-                self.route_y = [self.y_0_original]
+                self.route = False
+                self.route_x = []
+                self.route_y = []
                 self.x_0 = self.x_0_original
                 self.y_0 = self.y_0_original
-
 
         ## check for crossings and go deep
         j = 0
@@ -259,19 +245,23 @@ class Route:
         while j < len(self.steps) - 1:
             step = self.steps[j]
             free = self.check_free(step, j)
-            print self.steps
             # if a line can't go anywhere, it has to go back to try again
             if not free:
+                
+                print "go back"
+                print j
                 go_back = self.go_back(step, j)
+                print go_back
                 if not go_back:
+                    print "no going back"
                     self.current_depth += 1
                     j = 0
                 else:
+                    temp = j
                     j = go_back
-                    to_pop = len(self.route_depth) - j
+                    to_pop = temp - j
                     for i in range(to_pop):
                         self.route_depth.pop()
-                    print self.route_depth
             else:
                 self.route_depth.append(self.current_depth)
                 j += 1
@@ -295,175 +285,105 @@ class Route:
         
         return self.steps
 
-    # the methods for actually moving around
-    def go_right(self, not_last):
-        # update the coordinate
-        self.x_0 += 1
+    def move_around(self, step, not_last):
+        # update the relevant coordinate
+        if step == 0:
+            self.x_0 += 1
+            # check if the move is within the matrix
+            if self.x_0 == self.matrix_x:
+                return False
+            self.route = True
+        elif step == 1:
+            self.y_0 += 1
+            if self.y_0 == self.matrix_y:
+                return False
+            self.route = True
+        elif step == 2:
+            self.x_0 -= 1
+            if self.x_0 == 0:
+                return False
+            self.route = True
+        elif step == 3:
+            self.y_0 -= 1
+            if self.y_0 == 0:
+                return False
+            self.route = True
 
-        # check if the move up is within the matrix
-        if (self.y_0 == self.matrix_x):
-            return False
-        
         self.matrix = self.list_matrices[self.current_depth]
 
-        # check if the the step is hitting a logical gate
         list_temp = self.matrix[self.y_0]
         matrix_entry = list_temp[self.x_0]
-        self.route_x.append(self.x_0)
-        self.route_y.append(self.y_0)
-        self.route_depth.append(0)
-        if matrix_entry < 0:
-            return False
-        # save the coordinates of the step in a the list
-##        if not_last:
-##            self.route_x.append(self.x_0)
-##            self.route_y.append(self.y_0)
-        self.route_x.append(self.x_0)
-        self.route_y.append(self.y_0)
-        self.route_depth.append(self.current_depth)
-        return True
-
-    # actually move to the left
-    def go_left(self, not_last):
-
-        # update the coordinate
-        self.x_0 -= 1
-
-        # check if the move up is within the matrix
-        if (self.x_0 == 0):
-            return False
-        
-        self.matrix = self.list_matrices[self.current_depth]
-
+##        self.route_x.append(self.x_0)
+##        self.route_y.append(self.y_0)
+##        self.route_depth.append(0)
         # check if the the step is hitting a logical gate
-        list_temp = self.matrix[self.y_0]
-        matrix_entry = list_temp[self.x_0]
-        self.route_x.append(self.x_0)
-        self.route_y.append(self.y_0)
-        self.route_depth.append(self.current_depth)
         if matrix_entry < 0:
             return False
+
         # save the coordinates of the step in a the list
-##        if not_last:
-##            self.route_x.append(self.x_0)
-##            self.route_y.append(self.y_0)
-        return True
-
-    # actually move down
-    def go_down(self, not_last):
-        # update the coordinate
-        self.y_0 += 1
-
-        # check if the move up is within the matrix
-        if (self.y_0 == self.matrix_y):
-            return False
-        
-        self.matrix = self.list_matrices[self.current_depth]
-
-        # check if the the step is hitting a logical gate
-        list_temp = self.matrix[self.y_0]
-        matrix_entry = list_temp[self.x_0]
-        self.route_x.append(self.x_0)
-        self.route_y.append(self.y_0)
-        self.route_depth.append(self.current_depth)
-        if matrix_entry < 0:
-            return False
-        # save the coordinates of the step in a the list
-##        if not_last:
-##            self.route_x.append(self.x_0)
-##            self.route_y.append(self.y_0)
-        return True
-
-    # actually move up
-    def go_up(self, not_last):
-        # update the coordinate
-        self.y_0 -= 1
-
-        # check if the move up is within the matrix
-        if (self.y_0 == 0):
-            return False
-        self.matrix = self.list_matrices[self.current_depth]
-
-        # check if the the step is hitting a logical gate
-        list_temp = self.matrix[self.y_0]
-        matrix_entry = list_temp[self.x_0]
-        self.route_x.append(self.x_0)
-        self.route_y.append(self.y_0)
-        self.route_depth.append(self.current_depth)
-        if matrix_entry < 0:
-            return False
-        # save the coordinates of the step in a the list
-##        if not_last:
-##            self.route_x.append(self.x_0)
-##            self.route_y.append(self.y_0)
+        if not_last:
+            self.route_x.append(self.x_0)
+            self.route_y.append(self.y_0)
         return True
 
     def check_free(self, step, step_no):
         y_check = self.route_y[step_no]
         x_check = self.route_x[step_no]
-##        if step == 0:
-##            x_check = self.route_x[step_no] + 1
-##            y_check = self.route_y[step_no]
-##        elif step == 1:
-##            y_check = self.route_y[step_no + 1]
-##            x_check = self.route_x[step_no + 1]
-##        elif step == 2:
-##            x_check = self.route_x[step_no] - 1
-##            y_check = self.route_y[step_no]
-##        else:
-##            y_check = self.route_y[step_no] - 1
-##            x_check = self.route_x[step_no]
-
+        if step_no < len(self.route_y) - 1:
+            y_check = self.route_y[step_no + 1]
+            x_check = self.route_x[step_no + 1]
+        
         self.matrix = self.list_matrices[self.current_depth]
         list_temp = self.matrix[y_check]
         matrix_entry = list_temp[x_check]
         
         # check step ahead, if not free move deeper
         if matrix_entry > 0:
-            return self.try_layer(x_check, y_check, self.current_depth)
+            y_check = self.route_y[step_no]
+            x_check = self.route_x[step_no]
+            return self.try_layer(x_check, y_check, self.current_depth, step_no)
         else:
             return True
 
-    def try_layer(self, x_check, y_check, depth):
-        tried_up = False
+    def try_layer(self, x_check, y_check, depth, step_no):
+        print "TRY LAYER"
+        print x_check
+        print y_check
+        print depth
+        self.tried_up = False
         try_both = True
         random_deep = random.random
         while try_both:
             new_depth = depth
-            if self.current_depth == 0 or tried_up or random.random > .9:
-                 new_depth = depth + 1
-                 try_both = False
+            if depth == 0 or self.tried_up:
+                new_depth = depth + 1
+                try_both = False
             else:
                 new_depth = depth - 1
-                tried_up = True
+                self.tried_up = True
             if len(self.list_matrices) > new_depth:
                 self.matrix = self.list_matrices[new_depth]
-                print "depth"
-                print new_depth
-                print "oude matrix"
-                print x_check
-                print y_check
-                print new_depth
-                print self.matrix
             else:
                 self.matrix_inst = GridMatrix(self.matrix_x, self.matrix_y)
                 self.list_matrix_inst.append(self.matrix_inst)
                 self.matrix_inst.read_coordinates('grid_1.txt')
                 self.matrix = self.matrix_inst.get_matrix()
-                print "depth"
-                print new_depth
-                print "nieuwe matrix"
-                print self.matrix
                 self.list_matrices.append(self.matrix)
 
             list_temp = self.matrix[y_check]
             matrix_entry = list_temp[x_check]
-            # return if you can go up (or down)
+            print "TE CHECKEN"
+            print try_both
             print matrix_entry
+            # return if you can go up (or down)
             if matrix_entry == 0:
+                print "holler"
+                self.route_x.insert(step_no, x_check)
+                self.route_y.insert(step_no, y_check)
+                self.route_depth.append(new_depth)
                 self.current_depth = new_depth
                 return True
-                                   
+        print "GO GO GO"
         return False
     
     def go_back(self, step, step_no):
@@ -477,7 +397,7 @@ class Route:
             x = self.route_x[step_now]
             y = self.route_y[step_now]
             depth = self.route_depth[step_now]
-            move = self.try_layer(x, y, depth)
+            move = self.try_layer(x, y, depth, step_no)
             if move:
                 return step_now
         if not move:
@@ -493,7 +413,7 @@ class Route:
 ##        print route_x
 ##        print route_y
 ##        print route_depth
-        for i in range(length):
+        for i in range(len(self.route_x)):
             route_depth = self.route_depth[i]
             current_matrix = self.list_matrices[route_depth]
             self.list_matrices.pop(route_depth)
@@ -518,3 +438,97 @@ class Route:
                     sys.stdout.flush()
                 print
             print
+
+
+    ##    # the methods for actually moving around
+##    def go_right(self, not_last):
+##        # update the coordinate
+##        
+##
+##        
+##        
+##        
+##        
+##
+##        
+##
+##        self.route_x.append(self.x_0)
+##        self.route_y.append(self.y_0)
+##        self.route_depth.append(self.current_depth)
+##        return True
+##
+##    # actually move to the left
+##    def go_left(self, not_last):
+##
+##        # update the coordinate
+##        self.x_0 -= 1
+##
+##        # check if the move up is within the matrix
+##        if (self.x_0 == 0):
+##            return False
+##        
+##        self.matrix = self.list_matrices[self.current_depth]
+##
+##        # check if the the step is hitting a logical gate
+##        list_temp = self.matrix[self.y_0]
+##        matrix_entry = list_temp[self.x_0]
+##        self.route_x.append(self.x_0)
+##        self.route_y.append(self.y_0)
+##        self.route_depth.append(self.current_depth)
+##        if matrix_entry < 0:
+##            return False
+##        # save the coordinates of the step in a the list
+####        if not_last:
+####            self.route_x.append(self.x_0)
+####            self.route_y.append(self.y_0)
+##        return True
+##
+##    # actually move down
+##    def go_down(self, not_last):
+##        # update the coordinate
+##        self.y_0 += 1
+##
+##        # check if the move up is within the matrix
+##        if (self.y_0 == self.matrix_y):
+##            return False
+##        
+##        self.matrix = self.list_matrices[self.current_depth]
+##
+##        # check if the the step is hitting a logical gate
+##        list_temp = self.matrix[self.y_0]
+##        matrix_entry = list_temp[self.x_0]
+##        self.route_x.append(self.x_0)
+##        self.route_y.append(self.y_0)
+##        self.route_depth.append(self.current_depth)
+##        if matrix_entry < 0:
+##            return False
+##        # save the coordinates of the step in a the list
+####        if not_last:
+####            self.route_x.append(self.x_0)
+####            self.route_y.append(self.y_0)
+##        return True
+##
+##    # actually move up
+##    def go_up(self, not_last):
+##        # update the coordinate
+##        self.y_0 -= 1
+##
+##        # check if the move up is within the matrix
+##        if (self.y_0 == 0):
+##            return False
+##        self.matrix = self.list_matrices[self.current_depth]
+##
+##        # check if the the step is hitting a logical gate
+##        list_temp = self.matrix[self.y_0]
+##        matrix_entry = list_temp[self.x_0]
+##        self.route_x.append(self.x_0)
+##        self.route_y.append(self.y_0)
+##        self.route_depth.append(self.current_depth)
+##        if matrix_entry < 0:
+##            return False
+##        # save the coordinates of the step in a the list
+####        if not_last:
+####            self.route_x.append(self.x_0)
+####            self.route_y.append(self.y_0)
+##        return True
+
