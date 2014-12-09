@@ -54,8 +54,7 @@ class a_star():
                     list_temp.pop(x)
                     list_temp.insert(x, value)
                     self.layers[z].insert(y, list_temp)
-                print self.layers
-                break
+                return path
 
             # you make a step so update the score by 1
             amount_of_steps = current.steps + 1
