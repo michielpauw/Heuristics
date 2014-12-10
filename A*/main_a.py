@@ -8,7 +8,7 @@ def main():
 	# a = matrix.new_line(90, 107, 11)
 	# b = matrix.new_line(9, 225, 22)
 	
-	routes = route.read_routes("scheme_1_grid_1.txt")
+	routes = route.read_routes("g_scheme_3_grid_1.txt")
 	routes_lijstje = []
 	Total_routes = 0
 	for i in range(len(routes)):
