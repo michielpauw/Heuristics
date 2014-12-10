@@ -1,6 +1,7 @@
 from GridMatrix import GridMatrix
 from line_matrix import LineMatrix
-from route import Route
+# from route import Route
+from route_new import Route
 from graph_matrix import GraphMatrix
 from layering import Layering
 from clique_finder import CliqueFinder
@@ -10,30 +11,37 @@ import random
 
 def main():
     # create an instance of the gridmatrix and new_route class
-    new_route = Route(18, 13)
+    
 ##    clique_finder = CliqueFinder(0)
 
-    
     # load the chips in the matrix
-    matrix = GridMatrix(18, 13)
-    line_matrix = LineMatrix(18, 13)
-    line_matrix.read_coordinates('grid_1.txt')
-    matrix.read_coordinates('grid_1.txt')
-    results = matrix.get_results()
+    # matrix = GridMatrix(18, 13)
+    # line_matrix = LineMatrix(18, 13)
+    # line_matrix.read_coordinates('grid_1.txt')
+    # matrix.read_coordinates('grid_1.txt')
+    # results = matrix.get_results()
     
-    line_matrix_val = line_matrix.get_matrix()
-    for column in line_matrix_val:
-        for row in column:
-            if isinstance(row, int):
-                sys.stdout.write("%03d " % (row))
-                sys.stdout.write(" ")
-                sys.stdout.flush()
-            else:
-                sys.stdout.write(row)
-        print
+    # line_matrix_val = line_matrix.get_matrix()
+    # for column in line_matrix_val:
+    #     for row in column:
+    #         if isinstance(row, int):
+    #             sys.stdout.write("%03d " % (row))
+    #             sys.stdout.write(" ")
+    #             sys.stdout.flush()
+    #         else:
+    #             sys.stdout.write(row)
+    #     print
 
+    new_route = Route(18, 13, 'grid_1.txt')
     # create a list of all the gates that should be connected
     new_route.read_routes('scheme_test.txt')
+    ready = new_route.create_routes()
+    while not ready:
+        new_route.clear_everything()
+        new_route = Route(18, 13, 'grid_1.txt')
+        ready = new_route.create_routes()
+    print "youpie"
+    new_route.cross_matrix()
     
 ##    max_clique = 0
 
