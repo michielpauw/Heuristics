@@ -1,10 +1,13 @@
 import csv
+import random
 
 class GridMatrix:
 
     # define variables
     list_hor = []
     list_ver = []
+
+    scheme = []
     
     hor = 0
     vert = 0
@@ -54,6 +57,37 @@ class GridMatrix:
         list_temp.pop(a)
         list_temp.insert(a, -value)
         self.list_ver.insert(b, list_temp)
+
+    def read_routes(self, scheme):
+        with open(scheme) as inputfile:
+            file = csv.reader(inputfile, quoting=csv.QUOTE_NONNUMERIC)
+            for row in file:
+                self.scheme.append(row)
+
+        # start with a random route in the scheme
+        random_order = random.sample(range(len(self.scheme)), len(self.scheme))
+
+        routes_list = []
+
+        # create a route for every connection in the scheme
+        for i in range(len(self.scheme)):
+            # take the route from the scheme
+            route_number = random_order[i]
+            route = self.scheme[route_number]
+            # get the start and finish gate
+            start_number = route[0]
+            finish_number = route[1]
+            start_coordinates = self.results[int(start_number)]
+            finish_coordinates = self.results[int(finish_number)]
+            start_node = self.calc_node(start_coordinates[0], start_coordinates[1])
+            finish_node = self.calc_node(finish_coordinates[0], finish_coordinates[1])
+            route_l = [start_node, finish_node, route_number]
+            routes_list.append(route_l)
+
+        return routes_list
+
+    def calc_node(self, x, y):
+        return int(x + y * self.hor)
 
     
         

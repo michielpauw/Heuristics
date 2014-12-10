@@ -7,15 +7,12 @@ from GridMatrix import GridMatrix
 class a_star():
 
     def __init__(self, x, y):
-        # self.matrix = matrix2
-        # self.layers = [matrix1, matrix2]
-        # self.dim_x = len(self.matrix[0])
-        # self.dim_y = len(self.matrix)
         matrix_temp1 = GridMatrix(x, y)
         self.matrix = list(matrix_temp1.list_ver)
         matrix_temp2 = GridMatrix(x, y)
         matrix_temp2.read_coordinates('grid_1.txt')
         self.layers = [list(matrix_temp2.list_ver)]
+
         self.dim_x = x
         self.dim_y = y
 
@@ -42,12 +39,13 @@ class a_star():
             # if the current node is the same as the goal
             if current.node == goal:
                 # get the path from the closed set
-                path = closedset[current.label]
+                path = list(closedset[current.label])
+                path.append(current.node)
                 for i in path:
                     if i == start or i == goal:
                         continue
-                    x = self.calc_x(i)
                     z = self.calc_z(i)
+                    x = self.calc_x(i, z)
                     y = self.calc_y(i, z)
                     list_temp = list(self.layers[z][y])
                     self.layers[z].pop(y)
@@ -80,8 +78,8 @@ class a_star():
         # if for some reason it steps out of the loop without returning a path alert
         return False
 
-    def calc_x(self, node):
-        return (node % self.dim_x)
+    def calc_x(self, node, z):
+        return (int(node - (z * 1000)) % self.dim_x)
 
     def calc_y(self, node, z):
         return (int((node - (z * 1000)) / self.dim_x))
@@ -104,6 +102,7 @@ class node():
             raise "this is not good"
         self.node_y = self.calc_y(self.node)
         if self.node_y > self.dim_y_m - 1:
+            print "node:", self.node, "x:", self.node_x, "y:", self.node_y, "dim_y:", self.dim_y_m
             raise "a little bit better"
         self.node_layer = z 
         self.label = self.node_layer * 1000 + self.node
@@ -167,11 +166,9 @@ class node():
             print "JOEEEEEEEE"
 
         if self.node_layer <= 0:
-            #side_nodes.append("") 
             side_nodes.append(layer_down_node)
         elif self.node_layer >= 7:
             side_nodes.append(layer_up_node)
-            #side_nodes.append("")
         else:
             side_nodes.append(layer_up_node)
             side_nodes.append(layer_down_node)
@@ -222,12 +219,18 @@ class node():
             return 0
 
     def score(self, current_score):
-        score = current_score + self.mh_dis()
         if self.node_layer > (len(self.layers) - 1):
             self.layers.append(list(self.matrix))
 
-        if self.layers[self.node_layer][self.node_y][self.node_x] != 0:
-            score = 100000
+        if self.layers[self.node_layer][self.node_y][self.node_x] > 0:
+            score = 3000000
+        elif self.layers[self.node_layer][self.node_y][self.node_x] < 0:
+            score = 2000000
+        elif self.node_layer > 0:
+            score = int(current_score + self.mh_dis() -  (self.node_layer * 2))
+        else:
+            score = current_score + self.mh_dis()
+
         return score
 
     def mh_dis(self):
