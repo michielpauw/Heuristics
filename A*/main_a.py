@@ -3,12 +3,10 @@ from a_star import a_star, node
 import sys
 
 def main():
-	route = GridMatrix(18,13)
-	matrix = a_star(18,13)
-	# a = matrix.new_line(90, 107, 11)
-	# b = matrix.new_line(9, 225, 22)
+	route = GridMatrix(18,17)
+	matrix = a_star(18,17, "grid_2.txt")
 	
-	routes = route.read_routes("g_scheme_1_grid_1.txt")
+	routes = route.read_routes("g_scheme_3_grid_2.txt")
 	routes_lijstje = []
 	Total_routes = 0
 	for i in range(len(routes)):
@@ -66,7 +64,7 @@ def main():
 
 					if routes_lijstje[i][k] == routes_lijstje[j][l]:
 						crosses += 1
-						print "route:", i, "node:", routes_lijstje[i][k], "with:", j, "node:",routes_lijstje[j][l]
+						# print "route:", i, "node:", routes_lijstje[i][k], "with:", j, "node:",routes_lijstje[j][l]
 
 	print counter, crosses, Total_routes
 	# print a, b
