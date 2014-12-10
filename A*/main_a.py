@@ -8,7 +8,7 @@ def main():
 	# a = matrix.new_line(90, 107, 11)
 	# b = matrix.new_line(9, 225, 22)
 	
-	routes = route.read_routes("g_scheme_3_grid_1.txt")
+	routes = route.read_routes("g_scheme_1_grid_1.txt")
 	routes_lijstje = []
 	Total_routes = 0
 	for i in range(len(routes)):
@@ -20,8 +20,21 @@ def main():
 
 	counter = 0
 	crosses = 0
-	a = matrix.layers
-	for column in a:
+	# check for empty last layer
+	length_l = len(matrix.layers)
+	empty = 0
+	for i in matrix.layers[length_l - 1]:
+		for j in i:
+			if j != 0:
+				empty += 1
+
+	if empty == 0:
+		matrix.layers.pop(length_l - 1)
+
+
+
+
+	for column in matrix.layers:
 		counter += 1 
 		# print column
 		for row in column:

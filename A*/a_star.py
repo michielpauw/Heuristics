@@ -226,6 +226,8 @@ class node():
             score = 3000000
         elif self.layers[self.node_layer][self.node_y][self.node_x] < 0:
             score = 2000000
+        elif self.node_layer > 4:
+            score = int(current_score + self.mh_dis() -  8)
         elif self.node_layer > 0:
             score = int(current_score + self.mh_dis() -  (self.node_layer * 2))
         else:
