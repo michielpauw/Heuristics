@@ -3,6 +3,7 @@ import csv
 from GridMatrix import GridMatrix
 import sys
 from graph_matrix import GraphMatrix
+import copy
 
 class Route:
 
@@ -41,6 +42,9 @@ class Route:
     attempt_serious = 0
     grid = ""
     routes_drawn = 0
+    list_steps = []
+    steps_original = []
+    
 
     # get the dimensions of the matrix and fill in the gates
     def __init__(self, x, y, grid):
@@ -62,7 +66,6 @@ class Route:
                 self.scheme.append(row)
 
     def create_routes(self):
-        print "GAAN WE WEER"
         # the order in which the routes are drawn is random
         random_order = random.sample(range(len(self.scheme)), len(self.scheme))
         self.routes_drawn = 0
@@ -70,7 +73,6 @@ class Route:
         self.matrix = self.matrix_inst.get_matrix()
         self.list_matrices.append(self.matrix_inst.get_matrix())
         for i in range(len(random_order)):
-            print "HOLLA"
             self.route_number = random_order[i]
             self.set_up_conditions()
             # Make the route
@@ -98,9 +100,7 @@ class Route:
         self.route_list_z = []
         self.steps = []
         self.matrix = []
-        self.matrix_x = 0
-        self.matrix_y = 0
-        self.matrix_inst = GridMatrix(0, 0)
+        self.matrix_inst = GridMatrix(self.matrix_x, self.matrix_y)
         self.list_matrices = []
         self.list_matrix_inst = []
         self.amount_steps = 0
@@ -113,6 +113,7 @@ class Route:
         self.attempt_serious = 0
         self.grid = ""
         self.routes_drawn = 0
+        self.steps_list = []
         
     def set_up_conditions(self):
         route = self.scheme[self.route_number]
@@ -167,99 +168,84 @@ class Route:
         self.x = self.x_0
         self.y = self.y_0
         self.z = 0
+        
+        print self.x_0
 
         self.create_step_list()
         print "route_number"
         print self.route_number + 1
         
-        steps_original = self.steps
+        self.steps_original = []
+        self.steps_original = list(self.steps)
         route_finished = False
         attempt = 0
         self.attempt_serious = 0
         while not route_finished:
             continue_from_step = 0
             i = 0
-            if attempt > 100:
-                self.steps = steps_original
+            if attempt > 200:
+                self.steps = []
+                self.steps = list(self.steps_original)
                 attempt = 0
                 self.attempt_serious += 1
                 if self.attempt_serious > 100:
-                    print "start over"
                     return False
-            while i < len(self.steps) - 1:
+                    self.clear_everything()
+                    self.create_routes()
+            while i < len(self.steps) - 1 and attempt < 300:
                 current_step = self.steps[i]
                 in_bounds = self.update_position(current_step)
                 if in_bounds < 0:
-                    continue_from_step = self.find_solution(in_bounds, i)
-                    i = continue_from_step
+                    self.steps = []
+                    self.steps = list(self.steps_original)
                     self.x = self.x_0
                     self.y = self.y_0
                     self.z = 0
+                    i = 0
                     attempt += 1
-                    break
+                    continue
                 else:
                     tile_is_free = self.check_free()
                     if not tile_is_free:
                         continue_from_step = self.find_solution(current_step, i)
-                        i = continue_from_step
+                        i = continue_from_step + 1
+                        # print continue_from_step
                         if not continue_from_step:
-                            self.steps = steps_original
                             self.x = self.x_0
                             self.y = self.y_0
                             self.z = 0
                             i = 0
                             attempt += 1
-                            break
+                            continue
                     else:
                         i += 1
+                        
                 if i == len(self.steps) - 1:
                     route_finished = True
                     
         if route_finished:
             self.remove_useless_steps()
             self.routes_drawn += 1
-            print self.routes_drawn
             print "attempt_serious"
             print self.attempt_serious
             self.tracker += 1
             self.draw_route()
             self.create_route_list()
+            self.list_steps.append(self.steps)
             return True
                 
-    
-    def remove_useless_steps(self):
-        print "lengte"
-        print len(self.steps)
-        i = 0
-        while i < len(self.steps) - 1:
-            current_step = self.steps[i]
-            if current_step <= 3:
-                opposite = current_step + 3
-            else:
-                opposite = current_step - 3
-            next_step = self.steps[i + 1]
-            if next_step == opposite:
-                print self.steps
-                print i
-                print next_step
-                print opposite
-                self.steps.pop(i)
-                self.steps.pop(i)
-                i -= 2
-            i += 1
-    
     def update_position(self, step):
         # update the relevant coordinate
         if step == 1:
             self.x += 1
             # check whether the route goes out of bounds
-            if self.x == self.matrix_x - 1:
+            if self.x >= self.matrix_x - 1:
                 return -1
             else:
                 return 1
         elif step == 2:
             self.y += 1
-            if self.y == self.matrix_y - 1:
+            if self.y >= self.matrix_y - 1:
                 return -2
             else:
                 return 1
@@ -297,12 +283,10 @@ class Route:
             self.list_matrices.append(new_matrix)
         current_layer = self.list_matrices[self.z]
         current_row = current_layer[self.y]
-        print "soms error"
-        print len(current_row)
-        print self.x
         current_point = current_row[self.x]
         
         if current_point != 0:
+            print "gebeurt iets"
             return False
         else:
             return True
@@ -312,10 +296,14 @@ class Route:
         random_value = random.random()
         # sometimes rearranging the steps gives the solution to both problems
         # and we should always attempt this first, because it will save steps
-        if random_value < .99:
+        if random_value < .8:
             self.attempt_shuffle += 1
-            random.shuffle(self.steps)
-            return 0
+            if problem < 0:
+                random.shuffle(self.steps)
+            else:
+                self.steps = list(self.steps_original)
+                random.shuffle(self.steps)
+            return False
         else:
             # find deeper solution for out of bounds
             if problem < 0 and len(self.steps) > self.total_dist:
@@ -343,6 +331,8 @@ class Route:
                     
                     
     def find_detour(self, step, step_number):
+        opposite = 0
+        step_to_try = 0
         # last move is illegal, so go back to last legally reached tile
         last_step = step
         if last_step <= 3:
@@ -356,10 +346,10 @@ class Route:
         # try every direction from this tile
         random_try_step = random.sample([1, 2, 3, 4, 5, 6], 6)
         random_try_step.remove(last_step)
-        for i in range(5):
+        for i in range(len(random_try_step)):
             step_to_try = random_try_step[i]
             
-            if step_to_try<= 3:
+            if step_to_try <= 3:
                 opposite = last_step + 3
             else:
                 opposite = last_step - 3
@@ -374,34 +364,33 @@ class Route:
                 continue
             else:
                 free = self.check_free()
+            self.update_position(opposite)
             # if a side is free: don't look further
             if free:
                 break
-            # if not free: go back and try again (or not)
-            else:
-                self.update_position(opposite)
-                step_number = step_number - 1
-                if step_number < 0:
-                    return False
-                return self.find_detour(self.steps[step_number], step_number)
         
         if free:
+            print step_to_try
             self.steps.insert(step_number, step_to_try)
-            if step_to_try <= 3:
-                opposite = step_to_try + 3
-            else:
-                opposite = step_to_try - 3
-            
             # if the solving step is taken in the opposite direction of the original
             # step, it will return to the same point, which is quite useless
-            if step_to_try == opposite:
-                index_original_step = int(len(self.steps) - random.random() * step_number)
-                self.steps.pop[step_number]
-                self.steps.insert(index_original_step, last_step)
+            # if step_to_try == opposite:
+            #     index_original_step = int(len(self.steps) - random.random() * step_number)
+            #     self.steps.pop[step_number]
+            #     self.steps.insert(index_original_step, last_step)
             
             index_opposite = int(len(self.steps) - random.random() * step_number)
             self.steps.insert(index_opposite, opposite)
-            return step_number          
+            return step_number
+        
+        # if not free: go back and try again (or not)
+        else:
+            step_number = step_number - 1
+            if step_number < 0:
+                return False
+            else:
+                print "go further back"
+                return self.find_detour(self.steps[step_number], step_number)      
 
     def draw_route(self):
         self.x = self.x_0
@@ -441,7 +430,6 @@ class Route:
              
                 
     def create_route_list(self):
-        print self.steps
         route_x = []
         route_y = []
         route_z = []
@@ -519,4 +507,50 @@ class Route:
                     sys.stdout.write(row)
             print
                 
+    def remove_useless_steps(self):
+        i = 0
+        while i < len(self.steps) - 1:
+            current_step = self.steps[i]
+            if current_step <= 3:
+                opposite = current_step + 3
+            else:
+                opposite = current_step - 3
+            next_step = self.steps[i + 1]
+            if next_step == opposite:
+                self.steps.pop(i)
+                self.steps.pop(i)
+                i -= 2
+            i += 1
+        # check for loops we don't want
+        while i < len(self.steps) - 1:
+            j = i
+            amount_pos_x = 0
+            amount_pos_y = 0
+            amount_pos_z = 0
+            amount_neg_x = 0
+            amount_neg_y = 0
+            amount_neg_z = 0
+            while j < len(self.steps) - 1:
+                step = self.steps[j]
+                if step == 1:
+                    amount_pos_x += 1
+                elif step == 2:
+                    amount_pos_y += 1
+                elif step == 3:
+                    amount_pos_z += 1
+                elif step == 4:
+                    amount_neg_x += 1
+                elif step == 5:
+                    amount_neg_y += 1
+                elif step == 6:
+                    amount_neg_z += 1
+                j += 1
+                if amount_pos_x == amount_neg_x and amount_pos_y == amount_neg_y and amount_pos_z == amount_neg_z:
+                    k = i
+                    while k < j:
+                        self.steps.pop[i]
+                        k += 1
+                    j = i
+                    
                 
+    

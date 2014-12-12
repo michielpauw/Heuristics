@@ -36,11 +36,12 @@ def main():
     # create a list of all the gates that should be connected
     new_route.read_routes('scheme_test.txt')
     ready = new_route.create_routes()
-    while not ready:
-        new_route.clear_everything()
-        new_route = Route(18, 13, 'grid_1.txt')
-        ready = new_route.create_routes()
+    if not ready:
+        print "CRAP"
     print "youpie"
+    print new_route.list_steps
+    print len(new_route.list_steps)
+    print new_route.attempt_serious
     new_route.cross_matrix()
     
 ##    max_clique = 0

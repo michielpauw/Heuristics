@@ -13,7 +13,7 @@ class GraphMatrix:
     
     # create a matrix with the right dimensions filled with only zeroes
     def create_empty(self):
-        self.list_1= []
+        self.list_1 = []
         self.list_2 = []
         for i in range(self.size):
             self.list_1 = []
