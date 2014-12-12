@@ -6,11 +6,11 @@ from GridMatrix import GridMatrix
 
 class a_star():
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, grid):
         matrix_temp1 = GridMatrix(x, y)
         self.matrix = list(matrix_temp1.list_ver)
         matrix_temp2 = GridMatrix(x, y)
-        matrix_temp2.read_coordinates('grid_1.txt')
+        matrix_temp2.read_coordinates(grid)
         self.layers = [list(matrix_temp2.list_ver)]
 
         self.dim_x = x
@@ -223,9 +223,11 @@ class node():
             self.layers.append(list(self.matrix))
 
         if self.layers[self.node_layer][self.node_y][self.node_x] > 0:
-            score = 3000000
-        elif self.layers[self.node_layer][self.node_y][self.node_x] < 0:
             score = 2000000
+        elif self.layers[self.node_layer][self.node_y][self.node_x] < 0:
+            score = 400000000
+        elif self.node_layer > 5:
+            score = int(current_score + self.mh_dis() -  10)
         elif self.node_layer > 0:
             score = int(current_score + self.mh_dis() -  (self.node_layer * 2))
         else:
