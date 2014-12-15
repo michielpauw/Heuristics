@@ -4,18 +4,32 @@ except ImportError:
     import queue as Q
 from GridMatrix import GridMatrix
 
+
 class a_star():
 
     def __init__(self, x, y, grid):
         matrix_temp1 = GridMatrix(x, y)
+        matrix_temp3 = GridMatrix(x, y)
+        matrix_temp3.gate_lead(grid)
         self.matrix = list(matrix_temp1.list_ver)
         matrix_temp2 = GridMatrix(x, y)
         matrix_temp2.read_coordinates(grid)
-        self.layers = [list(matrix_temp2.list_ver)]
-
+        self.layers = [list(matrix_temp2.list_ver), list(matrix_temp3.list_ver), list(matrix_temp3.list_ver), list(matrix_temp3.list_ver), list(matrix_temp3.list_ver)]
         self.dim_x = x
         self.dim_y = y
 
+    def delete_line(self, path):
+        for i in range(len(path)):
+            if i == 0 or i == len(path) - 1:
+                continue
+            z = self.calc_z(path[i])
+            x = self.calc_x(path[i], z)
+            y = self.calc_y(path[i], z)
+            list_temp = list(self.layers[z][y])
+            self.layers[z].pop(y)
+            list_temp.pop(x)
+            list_temp.insert(x, 0)
+            self.layers[z].insert(y, list_temp)
 
     def new_line(self, start, goal, value):
         # nodes evaluated a dictionary with every node represented by their label and shortest route towards it
@@ -24,7 +38,10 @@ class a_star():
         # cost from start along best known path.
         steps = 0
 
+
         first = node(start, 0, goal, steps, self.dim_x, self.dim_y, self.layers, list(self.matrix))
+
+        # print first.node_score
         # list of potential nodes weighed by their score (sorted list)
         openset = Q.PriorityQueue()
         openset.put((first.node_score, first))
@@ -36,23 +53,6 @@ class a_star():
             path = list(closedset[current.label])
 
             # print "node:", current.node, "x:", current.node_x, "y:", current.node_y
-            # if the current node is the same as the goal
-            if current.node == goal:
-                # get the path from the closed set
-                path = list(closedset[current.label])
-                path.append(current.node)
-                for i in path:
-                    if i == start or i == goal:
-                        continue
-                    z = self.calc_z(i)
-                    x = self.calc_x(i, z)
-                    y = self.calc_y(i, z)
-                    list_temp = list(self.layers[z][y])
-                    self.layers[z].pop(y)
-                    list_temp.pop(x)
-                    list_temp.insert(x, value)
-                    self.layers[z].insert(y, list_temp)
-                return path
 
             # you make a step so update the score by 1
             amount_of_steps = current.steps + 1
@@ -74,6 +74,22 @@ class a_star():
                 else:
                     closedset[i.label] = temp_path
                     openset.put((i.node_score, i))
+
+                if i.label == goal:
+                    # get the path from the closed set
+                    path = temp_path
+                    for i in path:
+                        if i == start or i == goal:
+                            continue
+                        z = self.calc_z(i)
+                        x = self.calc_x(i, z)
+                        y = self.calc_y(i, z)
+                        list_temp = list(self.layers[z][y])
+                        self.layers[z].pop(y)
+                        list_temp.pop(x)
+                        list_temp.insert(x, value)
+                        self.layers[z].insert(y, list_temp)
+                    return path
 
         # if for some reason it steps out of the loop without returning a path alert
         return False
@@ -98,6 +114,7 @@ class node():
         self.node = target
         self.steps = steps
         self.node_x = self.calc_x(self.node)
+
         if self.node_x > self.dim_x_m - 1:
             raise "this is not good"
         self.node_y = self.calc_y(self.node)
@@ -221,13 +238,21 @@ class node():
     def score(self, current_score):
         if self.node_layer > (len(self.layers) - 1):
             self.layers.append(list(self.matrix))
-
-        if self.layers[self.node_layer][self.node_y][self.node_x] > 0:
+        
+        if self.layers[self.node_layer][self.node_y][self.node_x] > 0 and self.layers[self.node_layer][self.node_y][self.node_x] < 100:
             score = 2000000
+        elif self.node_y == self.goal_y and self.node_x == self.goal_x:
+            score = 1
+        elif self.node_layer == 0 and self.node_x == self.goal_x and (self.node_y == self.goal_y + 1 or self.node_y == self.goal_y - 1):
+            score = 1
+        elif self.node_layer == 0 and self.node_y == self.goal_y and (self.node_x == self.goal_x + 1 or self.node_x == self.goal_x - 1):
+            score = 1
+        elif self.layers[self.node_layer][self.node_y][self.node_x] == 100: 
+            score = 1000000
         elif self.layers[self.node_layer][self.node_y][self.node_x] < 0:
             score = 400000000
-        elif self.node_layer > 5:
-            score = int(current_score + self.mh_dis() -  10)
+        elif self.node_layer > 6:
+            score = int(current_score + self.mh_dis() -  12)
         elif self.node_layer > 0:
             score = int(current_score + self.mh_dis() -  (self.node_layer * 2))
         else:
