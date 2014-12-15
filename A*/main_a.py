@@ -6,14 +6,13 @@ from Crosses import count_for_crosses, look_for_crosses
 
 def main():
 	x = 18
-	y = 13
+	y = 17
 	route = GridMatrix(x, y)
-	matrix = a_star(x, y, "grid_1.txt")
-	routes = route.read_routes("g_scheme_3_grid_1.txt")
+	matrix = a_star(x, y, "grid_2.txt")
+	routes = route.read_routes("g_scheme_1_grid_2.txt")
 	routes_lijstje = []
 	Total_routes = 0
 	for i in range(len(routes)):
-		# print "line: ", i
 		i = matrix.new_line(routes[i][0],routes[i][1], i+1)
 		routes_lijstje.append(i)
 		Total_routes += len(i)
@@ -31,9 +30,6 @@ def main():
 	# 			row = str(row)
 	# 			sys.stdout.write(row)
 	# 	print
-	# x = 0
-	# while x == 0:
-	# 	continue
 	loops = 0
 	crosses = look_for_crosses(routes_lijstje)
 	print count_for_crosses(routes_lijstje)
