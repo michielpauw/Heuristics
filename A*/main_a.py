@@ -9,7 +9,7 @@ def main():
 	y = 17
 	route = GridMatrix(x, y)
 	matrix = a_star(x, y, "grid_2.txt")
-	routes = route.read_routes("g_scheme_1_grid_2.txt")
+	routes = route.read_routes("g_scheme_3_grid_2.txt")
 	routes_lijstje = []
 	Total_routes = 0
 	for i in range(len(routes)):
@@ -17,23 +17,15 @@ def main():
 		routes_lijstje.append(i)
 		Total_routes += len(i)
 
-	# print routes_lijstje
-
-	# for column in matrix.layers:
-	# 	for row in column:
-	# 		print
-	# 		if isinstance(row, int):
-	# 			sys.stdout.write("%03d " % (row))
-	# 			sys.stdout.write(" ")
-	# 			sys.stdout.flush()
-	# 		else:
-	# 			row = str(row)
-	# 			sys.stdout.write(row)
-	# 	print
 	loops = 0
 	crosses = look_for_crosses(routes_lijstje)
+	best_cross = count_for_crosses(routes_lijstje)
+	best_lines = routes_lijstje
+	best_layers = matrix.layers
 	print count_for_crosses(routes_lijstje)
 	while crosses != [] :
+		routes_lijstje = best_lines
+		matrix.layers = best_layers
 		loops += 1
 		# print crosses , loop
 		if (loops%10) == 0:
@@ -87,7 +79,9 @@ def main():
 			routes_lijstje.insert(rand4, newline4)
 			routes_lijstje.pop(crosses[cross_length][0])
 			routes_lijstje.insert(crosses[cross_length][0], newline)
-			print count_for_crosses(routes_lijstje)
+			count_cross = count_for_crosses(routes_lijstje)
+			print count_cross
+
 		else:
 			rand = randrange(len(routes_lijstje) - 1)
 			cross_length = randrange(len(crosses))
@@ -99,13 +93,31 @@ def main():
 			routes_lijstje.insert(crosses[cross_length][1], newline1)
 			routes_lijstje.pop(crosses[cross_length][0])
 			routes_lijstje.insert(crosses[cross_length][0], newline)
+			count_cross = count_for_crosses(routes_lijstje)
+			print count_cross
 		crosses = look_for_crosses(routes_lijstje)
+		temp_total = 0
+		for i in routes_lijstje:
+			temp_total += len(i)
+
+		if count_cross < best_cross:
+			best_cross = count_cross
+			best_lines = routes_lijstje
+			best_layers = matrix.layers
+		elif count_cross == best_cross and temp_total < Total_routes:
+			best_cross = count_cross
+			best_lines = routes_lijstje
+			best_layers = matrix.layers
+
+		if loops == 200:
+			break
+
 	counter = 0 
 	
 	# check for empty last layer
 	length_l = len(matrix.layers)
 	empty = 0
-	for i in matrix.layers:
+	for i in best_layers:
 		count = 0
 		for j in i:
 			d = sum(j)
@@ -116,10 +128,10 @@ def main():
 
 	if empty > 0:
 		for i in range(1, empty+1):
-			matrix.layers.pop(length_l - i)
+			best_layers.pop(length_l - i)
 
 
-	for column in matrix.layers:
+	for column in best_layers:
 		counter += 1 
 		for row in column:
 			print
@@ -132,7 +144,7 @@ def main():
 				sys.stdout.write(row)
 		print
 
-	print counter, count_for_crosses(routes_lijstje), Total_routes
+	print counter, count_for_crosses(best_lines), Total_routes
 	
 if __name__ == "__main__":
     main()	
