@@ -1,5 +1,9 @@
 import csv
 
+# A class that creates our main data structure for the route module:
+# a matrix the size of the grid we are researching, with the logic 
+# gates in place.
+
 class GridMatrix:
 
     # define variables
