@@ -5,39 +5,53 @@ from random import randrange
 from Crosses import count_for_crosses, look_for_crosses
 
 def main():
+	# setting grid dimensions
 	x = 18
 	y = 17
+
+	# make variables containing the grid coordinates and the route scheme (netlist)
 	route = GridMatrix(x, y)
 	matrix = a_star(x, y, "grid_2.txt")
 	routes = route.read_routes("g_scheme_3_grid_2.txt")
 	routes_lijstje = []
 	Total_routes = 0
+
+	# draw every line in the grid
 	for i in range(len(routes)):
 		i = matrix.new_line(routes[i][0],routes[i][1], i+1)
 		routes_lijstje.append(i)
 		Total_routes += len(i)
 
+
+	# if the routes cross at some point, try to solve it using a sort of hillclimber
 	loops = 0
 	crosses = look_for_crosses(routes_lijstje)
 	best_cross = count_for_crosses(routes_lijstje)
-	best_lines = routes_lijstje
-	best_layers = matrix.layers
-	print count_for_crosses(routes_lijstje)
+	best_lines = list(routes_lijstje)
+	best_layers = list(matrix.layers)
+
+	# infinite loop till solution (no crosses) is found
 	while crosses != [] :
+		# get the last best known grid
 		routes_lijstje = best_lines
 		matrix.layers = best_layers
 		loops += 1
-		# print crosses , loop
+
+		# if you tried 10 times a different approach to find a solution (also in this way an infinite loop is improbable)
 		if (loops%10) == 0:
 			if crosses == []:
 				break
+
+			# take 4 random routes of the list
 			rand = randrange(len(routes_lijstje) - 1)
 			rand2 = randrange(len(routes_lijstje) - 1)
 			rand3 = randrange(len(routes_lijstje) - 1)
 			rand4 = randrange(len(routes_lijstje) - 1)
 
+			# take 1 of the remaining crosses
 			cross_length = randrange(len(crosses))
 
+			#make sure you do not take away the same line
 			if rand == rand2:
 				rand2 += 1
 				rand2 = rand2%(len(routes_lijstje) - 1)
@@ -59,6 +73,7 @@ def main():
 				rand4 = rand4%(len(routes_lijstje) - 1)
 
 
+			# pop the 5 lines out of the grid and try to re-arange them
 			matrix.delete_line(routes_lijstje[rand])
 			matrix.delete_line(routes_lijstje[rand2])
 			matrix.delete_line(routes_lijstje[rand3])
@@ -80,9 +95,9 @@ def main():
 			routes_lijstje.pop(crosses[cross_length][0])
 			routes_lijstje.insert(crosses[cross_length][0], newline)
 			count_cross = count_for_crosses(routes_lijstje)
-			print count_cross
 
 		else:
+			# take one cross of the grid aand pop the lines and reroute them
 			rand = randrange(len(routes_lijstje) - 1)
 			cross_length = randrange(len(crosses))
 			matrix.delete_line(routes_lijstje[crosses[cross_length][1]])
@@ -94,7 +109,6 @@ def main():
 			routes_lijstje.pop(crosses[cross_length][0])
 			routes_lijstje.insert(crosses[cross_length][0], newline)
 			count_cross = count_for_crosses(routes_lijstje)
-			print count_cross
 		crosses = look_for_crosses(routes_lijstje)
 		temp_total = 0
 		for i in routes_lijstje:
@@ -102,20 +116,21 @@ def main():
 
 		if count_cross < best_cross:
 			best_cross = count_cross
-			best_lines = routes_lijstje
-			best_layers = matrix.layers
+			best_lines = list(routes_lijstje)
+			best_layers = list(matrix.layers)
+			Total_routes = temp_total
 		elif count_cross == best_cross and temp_total < Total_routes:
 			best_cross = count_cross
-			best_lines = routes_lijstje
-			best_layers = matrix.layers
+			best_lines = list(routes_lijstje)
+			best_layers = list(matrix.layers)
+			Total_routes = temp_total
 
-		if loops == 200:
+		if loops == 500:
 			break
 
 	counter = 0 
 	
 	# check for empty last layer
-	length_l = len(matrix.layers)
 	empty = 0
 	for i in best_layers:
 		count = 0
@@ -126,11 +141,12 @@ def main():
 			if count == y:
 				empty += 1
 
+	# pop the empty layers
 	if empty > 0:
 		for i in range(1, empty+1):
 			best_layers.pop(length_l - i)
 
-
+	# count the layers and print the layers
 	for column in best_layers:
 		counter += 1 
 		for row in column:
@@ -144,7 +160,8 @@ def main():
 				sys.stdout.write(row)
 		print
 
-	print counter, count_for_crosses(best_lines), Total_routes
+	# results
+	print counter, best_cross, Total_routes
 	
 if __name__ == "__main__":
     main()	

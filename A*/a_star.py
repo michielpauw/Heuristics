@@ -4,9 +4,10 @@ except ImportError:
     import queue as Q
 from GridMatrix import GridMatrix
 
-
+# class that, makes the routes and layers
 class a_star():
 
+    # initialize some variables like a grid and some layers with probes
     def __init__(self, x, y, grid):
         matrix_temp1 = GridMatrix(x, y)
         matrix_temp3 = GridMatrix(x, y)
@@ -18,6 +19,7 @@ class a_star():
         self.dim_x = x
         self.dim_y = y
 
+    # function to delete a line
     def delete_line(self, path):
         for i in range(len(path)):
             if i == 0 or i == len(path) - 1:
@@ -26,6 +28,8 @@ class a_star():
             x = self.calc_x(path[i], z)
             y = self.calc_y(path[i], z)
             list_temp = list(self.layers[z][y])
+
+            # remove the line from the grid
             self.layers[z].pop(y)
             list_temp.pop(x)
             list_temp.insert(x, 0)
@@ -41,7 +45,6 @@ class a_star():
 
         first = node(start, 0, goal, steps, self.dim_x, self.dim_y, self.layers, list(self.matrix))
 
-        # print first.node_score
         # list of potential nodes weighed by their score (sorted list)
         openset = Q.PriorityQueue()
         openset.put((first.node_score, first))
@@ -52,12 +55,8 @@ class a_star():
             current = current[1]
             path = list(closedset[current.label])
 
-            # print "node:", current.node, "x:", current.node_x, "y:", current.node_y
-
             # you make a step so update the score by 1
             amount_of_steps = current.steps + 1
-
-            # print current.label, path
             
             # go over the accompaniying nodes
             for i in current.sides:
@@ -94,12 +93,15 @@ class a_star():
         # if for some reason it steps out of the loop without returning a path alert
         return False
 
+    # function to calculate the x coordinate of a node
     def calc_x(self, node, z):
         return (int(node - (z * 1000)) % self.dim_x)
 
+    # function to calculate the y coordinate of a node
     def calc_y(self, node, z):
         return (int((node - (z * 1000)) / self.dim_x))
 
+    # function to calculate the z coordinate of a node
     def calc_z(self,node):
         return int(node / 1000)
 
@@ -115,12 +117,13 @@ class node():
         self.steps = steps
         self.node_x = self.calc_x(self.node)
 
+        # error checking
         if self.node_x > self.dim_x_m - 1:
             raise "this is not good"
         self.node_y = self.calc_y(self.node)
         if self.node_y > self.dim_y_m - 1:
-            print "node:", self.node, "x:", self.node_x, "y:", self.node_y, "dim_y:", self.dim_y_m
             raise "a little bit better"
+       
         self.node_layer = z 
         self.label = self.node_layer * 1000 + self.node
         self.matrix = list(matrix)
@@ -128,15 +131,19 @@ class node():
         self.node_score = self.score(steps)
         self.sides = self.neighbors()
 
+    # calculate x coordinate
     def calc_x(self, node):
         return (node % (self.dim_x_m))
 
+    # calculate y coordinate
     def calc_y(self, node):
         return (int(node / (self.dim_x_m)))
 
+    # calculate the node from it's coordinate
     def calc_node(self, x, y):
         return x + y * self.dim_x_m
 
+    # define the neighbors of a node
     def neighbors(self):
         side_nodes = list()
         right_node = [self.calc_node(self.node_x + 1, self.node_y), self.node_layer]
@@ -180,6 +187,7 @@ class node():
             side_nodes.append(left_node)
             side_nodes.append(above_node)
         else:
+            # should not happen, thus an absurd error is printed
             print "JOEEEEEEEE"
 
         if self.node_layer <= 0:
@@ -235,31 +243,45 @@ class node():
         else:
             return 0
 
+    # a function to calculate the score of a node
     def score(self, current_score):
+        # add extra layers if needed (max 8)
         if self.node_layer > (len(self.layers) - 1):
             self.layers.append(list(self.matrix))
         
+        # cross a route/wire if no other possibility
         if self.layers[self.node_layer][self.node_y][self.node_x] > 0 and self.layers[self.node_layer][self.node_y][self.node_x] < 100:
             score = 2000000
+
+        # if near the goal, put it in fornt of the list
         elif self.node_y == self.goal_y and self.node_x == self.goal_x:
             score = 1
         elif self.node_layer == 0 and self.node_x == self.goal_x and (self.node_y == self.goal_y + 1 or self.node_y == self.goal_y - 1):
             score = 1
         elif self.node_layer == 0 and self.node_y == self.goal_y and (self.node_x == self.goal_x + 1 or self.node_x == self.goal_x - 1):
             score = 1
+
+        # only cross a lead if no free space left
         elif self.layers[self.node_layer][self.node_y][self.node_x] == 100: 
             score = 1000000
+
+        # do not cross gates
         elif self.layers[self.node_layer][self.node_y][self.node_x] < 0:
             score = 400000000
+
+        # with this part you drive a node to layer 6
         elif self.node_layer > 6:
             score = int(current_score + self.mh_dis() -  12)
         elif self.node_layer > 0:
             score = int(current_score + self.mh_dis() -  (self.node_layer * 2))
+        
+        # the simpelest score
         else:
             score = current_score + self.mh_dis()
 
         return score
 
+    # manhatten distiance funtion
     def mh_dis(self):
         xdis = abs(self.goal_x - self.node_x)
         ydis = abs(self.goal_y - self.node_y)
